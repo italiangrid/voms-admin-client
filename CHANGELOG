@@ -1,0 +1,53 @@
+---+ 2.0.17 
+
+* Refactored packaging so that no environment variable is needed and
+* Added man page for voms-admin.
+
+---+ 2.0.16
+
+First EMI release.
+Support for VOMS_LOCATION environment variable. 
+
+---+ 2.0.15
+
+CSRF header guard added to all outgoing requests. This is required in order to
+talk to VOMS-Admin server version >=2.5.5.
+
+---+ 2.0.14
+
+Real fix for:
+
+https://savannah.cern.ch/bugs/?61292:  VOMS Admin 2.0.7 Client fails with some (non-ASCII?) characters
+
+Integrated cli version management with maven pom version.
+
+ 
+---+ 2.0.13
+
+Licensing & copyright fixes.
+
+---+ 2.0.12
+
+Fixes for the following bugs:
+
+https://savannah.cern.ch/bugs/?61292:  VOMS Admin 2.0.7 Client fails with some (non-ASCII?) characters
+https://savannah.cern.ch/bugs/?59985:  [VOMS-ADMIN-2.5-CLI] 'ALL' permission resolution
+https://savannah.cern.ch/bugs/?51657:  [VOMS-ADMIN] delete-user does not treat Email= and emailAddress= as equivalent
+https://savannah.cern.ch/bugs/?60329:  [VOMS-ADMIN-2.5-CLI] Not possible to restore a certificate from the command line
+https://savannah.cern.ch/bugs/?60328:  [VOMS-ADMIN-2.5-CLI] remove-certificate does not work
+
+---+ 2.0.11
+
+This release adds support for certificate management operations as implemented by voms-admin-server >= 2.5.0.
+Four new operations are available:
+	
+	get-certificates: lists the certificates associated to a VO member
+	add-certificate: binds a new certificate to VO membership.
+	remove-certificate: unbinds a certificate from a VO membership.
+	suspend-certificate: suspends a certificate bound to a VO membership.
+	
+For more information about each command, type:
+	
+	voms-admin --help-command <command_name>
+
+	
