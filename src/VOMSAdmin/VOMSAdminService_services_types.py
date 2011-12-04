@@ -59,7 +59,7 @@ class ns0:
                 
                 def __repr__(self):
                                         
-                    return "%s, %s - %s" % (self._DN, self._CA,self._mail)
+                    return "%s,%s,%s" % (self._DN, self._CA,self._mail)
                 
             
             Holder.__name__ = "User_Holder"
