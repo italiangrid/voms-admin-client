@@ -15,10 +15,12 @@
 # limitations under the License.
 #
 # Authors:
-# 	Andrea Ceccanti (INFN)
+#     Andrea Ceccanti (INFN)
 #
 
-import xml.dom.minidom, re, sys, os.path
+import xml.dom.minidom, re, sys, os.path, urllib2, httplib
+import simplejson as json
+
 from VOMSAdminService import VOMSAdmin
 from VOMSAttributesService import VOMSAttributes
 from VOMSACLService import VOMSACL
@@ -28,6 +30,23 @@ from VOMSCommandsDef import commands_def
 from VOMSPermission import parse_permissions
 from VOMSAdmin import __version__, __commands__
 from xml.parsers.expat import ExpatError
+from urllib2 import HTTPError, URLError
+import simplejson
+
+class HTTPSClientAuthHandler(urllib2.HTTPSHandler):
+
+    def __init__(self, key, cert):
+        urllib2.HTTPSHandler.__init__(self)
+        self.key = key
+        self.cert = cert
+    
+    def https_open(self, req):
+        return self.do_open(self.getConnection, req)
+
+    def getConnection(self, host):
+        return httplib.HTTPSConnection(host, key_file=self.key, cert_file=self.cert)
+
+
 
 def command_argument_factory(type):
     
@@ -214,7 +233,7 @@ def _parse_commands():
     grouped_commands_hash = {}
     
     doc = None
-    
+        
     if os.path.exists(__commands__):
         try:
             doc = xml.dom.minidom.parse(__commands__)
@@ -320,6 +339,13 @@ class VOMSAdminProxy:
         self.base_url = "https://%s:%s/voms/%s/services" % (kw['host'],
                                                             kw['port'],
                                                             kw['vo'])
+        
+        self.rest_base_url = "https://%s:%s/voms/%s/ajax" % (kw['host'],
+                                                            kw['port'],
+                                                            kw['vo'])
+                
+        self.url_opener = urllib2.build_opener(HTTPSClientAuthHandler(key=kw['user_key'], cert=kw['user_cert']))
+        
         transdict = {
                      "cert_file":kw['user_cert'], 
                      "key_file":kw['user_key']
@@ -381,9 +407,74 @@ class VOMSAdminProxy:
         else:
             return defaultACL
     
-            
-            
-           
-
+    def __httpGet(self, action):
+        url = "%s/%s" % (self.rest_base_url, action)
+        
+        try:
+            f = self.url_opener.open(url)
+        except HTTPError, e:
+            raise RuntimeError, "The server could not answer the request for %s. %s" % (url,e)
+        except URLError, e:
+            raise RuntimeError, "Error contacting remote server: %s. Error: %s" % (url, e)
+        
+        return simplejson.load(f) 
     
+    def __getUserStats(self):
+        return self.__httpGet('user-stats.action')
     
+    def __getSuspendedUsers(self):
+        return self.__httpGet('suspended-users.action')
+    
+    def __getExpiredUsers(self):
+        return self.__httpGet('expired-users.action')
+    
+    def __printUserList(self, user_list):
+        for u in user_list:
+            
+            name = "%s %s" %(u['name'],u['surname'])
+                
+            if len(u['name']) == 0 and len(u['surname']) == 0:
+                ## Use certificate subject if name is not defined for this
+                ## user
+                name = u['certificates'][0]['subjectString']
+            
+            if u['suspended']:
+                status = "Suspended.  Reason: %s" % u['suspensionReason']
+            else:
+                status = "Active."
+                
+            print "%s (%d) - %s" % (name, u['id'],status)
+        
+    def countUsers(self):
+        res = self.__getUserStats()
+        print "User count: %d" % res['usersCount']        
+    
+    def countSuspendedUsers(self):
+        res = self.__getUserStats()
+        print "Suspended user count: %d" % res['suspendedUsersCount']
+    
+    def countExpiredUsers(self):
+        res = self.__getUserStats()
+        print "Expired user count: %d" % res['expiredUsersCount']
+        
+    def listSuspendedUsers(self):
+        res = self.__getSuspendedUsers()
+        if len(res['suspendedUsers']) == 0:
+            print "No suspended users found."
+        else:
+            self.__printUserList(res['suspendedUsers'])
+    
+    def listExpiredUsers(self):
+        res = self.__getExpiredUsers()
+        
+        if len(res['expiredUsers']) == 0:
+            print "No expired users found."
+        else:
+            self.__printUserList(res['expiredUsers'])
+    
+    def listUserStats(self):
+        res = self.__getUserStats()
+        for k in res.keys():
+            print "%s = %s " % (k,res[k])
+        
+        

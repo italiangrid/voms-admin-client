@@ -35,6 +35,56 @@ Copyright (c) Members of the EGEE Collaboration. 2006-2009.
         xml:space="preserve">
         Lists the VO users.</help-string>
     </command>
+    
+    <command
+      name="list-suspended-users">
+      <description>list-suspended-users</description>
+      <help-string
+        xml:space="preserve">
+        Lists the VO users that are currently suspended. (Requires VOMS Admin server >= 2.7.0)</help-string>
+    </command>
+    
+    <command
+      name="list-expired-users">
+      <description>list-expired-users</description>
+      <help-string
+        xml:space="preserve">
+        Lists the VO users that are currently expired. (Requires VOMS Admin server >= 2.7.0)</help-string>
+    </command>
+    
+    <command
+      name="count-expired-users">
+      <description>count-expired-users</description>
+      <help-string
+        xml:space="preserve">
+        Prints how many VO users are currently expired. (Requires VOMS Admin server >= 2.7.0)</help-string>
+    </command>
+    
+    <command
+      name="count-suspended-users">
+      <description>count-suspended-users</description>
+      <help-string
+        xml:space="preserve">
+        Counts how many VO users are currently suspended. (Requires VOMS Admin server >= 2.7.0)</help-string>
+    </command>
+    
+    <command
+      name="count-users">
+      <description>count-users</description>
+      <help-string
+        xml:space="preserve">
+        Counts how many users are in the VO. (Requires VOMS Admin server >= 2.7.0)</help-string>
+    </command>
+    
+    <command
+      name="list-user-stats">
+      <description>list-user-stats</description>
+      <help-string
+        xml:space="preserve">
+        List users statistics for this VO. (Requires VOMS Admin server >= 2.7.0)</help-string>
+    </command>
+    
+    
     <command
       name="create-user">
       <description>create-user CERTIFICATE.PEM</description>

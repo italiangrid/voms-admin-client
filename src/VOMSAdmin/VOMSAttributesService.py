@@ -18,9 +18,9 @@
 # 	Andrea Ceccanti (INFN)
 #
 
+from AttributesFix import *
 from VOMSAttributesService_services import *
 from VOMSAttributesService_services_types import *
-from AttributesFix import *
 from socket import error
 import sys
 

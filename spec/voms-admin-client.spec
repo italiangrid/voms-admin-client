@@ -18,11 +18,13 @@ Source: %{name}-%{version}.tar.gz
 
 BuildRequires: python-ZSI
 BuildRequires: python-devel
+BuildRequires: python-simplejson
 BuildRequires: asciidoc
 BuildRequires: PyXML
 
 Requires: python
 Requires: python-ZSI
+Requires: python-simplejson
 Requires: PyXML
 
 BuildArch: noarch
