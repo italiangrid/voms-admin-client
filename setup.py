@@ -37,6 +37,5 @@ setup(name='voms-admin-client',
       package_dir={'':'src'},
       packages=['VOMSAdmin'],
       scripts=["src/voms-admin"],
-      data_files=[('share/voms-admin-client', ['src/VOMSAdmin/data/voms-commands.xml']),
-                  ('share/doc/voms-admin-client',['README', 'LICENSE', 'CHANGELOG']),
+      data_files=[('share/doc/voms-admin-client',['README', 'LICENSE', 'CHANGELOG']),
                   ('share/man/man1', ['doc/voms-admin.1'])])

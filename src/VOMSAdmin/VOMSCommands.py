@@ -232,17 +232,7 @@ def _parse_commands():
     command_hash = {}
     grouped_commands_hash = {}
     
-    doc = None
-        
-    if os.path.exists(__commands__):
-        try:
-            doc = xml.dom.minidom.parse(__commands__)
-        except ExpatError:
-            ## Swallow exception
-            pass
-    
-    if doc is None: 
-        doc = xml.dom.minidom.parseString(commands_def)
+    doc = xml.dom.minidom.parseString(commands_def)
     
     for c in doc.getElementsByTagName("command"):
                     

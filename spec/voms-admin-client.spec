@@ -70,9 +70,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %{_bindir}/voms-admin
 
-%dir %{_datadir}/%{name}/
-%{_datadir}/%{name}/voms-commands.xml
-
 %doc %{_mandir}/man1/voms-admin.1.gz
 %dir %{_docdir}/%{name}/
 %doc %{_docdir}/%{name}/CHANGELOG
