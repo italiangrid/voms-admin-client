@@ -56,9 +56,10 @@ cmdline_long_options = ["host=",
                        "help-command=",
                        "name=",
                        "surname=",
+                       "address=",
                        "institution=",
-                       "phone-number=",
-                       "address="]
+                       "phoneNumber=",
+                       "description="]
 
 options = {}
 
@@ -222,10 +223,15 @@ def execute_command(cmd):
 
 
 
-def check_options():
+def check_options(args):
     
     if options.has_key("help") or options.has_key("h"):
-        usage()
+        
+        if len(args) == 0:
+            usage()
+        else:
+            print_command_help(args[0])
+        
         sys.exit(0)
     
     if options.has_key("help-acl"):
@@ -274,7 +280,7 @@ def parse_command_line():
         for key,val in opts:
             options[key[2:]]=val
     
-        check_options()
+        check_options(args)
     
         if len(args) == 0:
             print "No command given!"

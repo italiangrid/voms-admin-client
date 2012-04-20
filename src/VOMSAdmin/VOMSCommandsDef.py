@@ -30,6 +30,7 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
         xml:space="preserve">
         Lists the VO users.</help-string>
     </command>
+    
     <command
       name="list-suspended-users">
       <description>list-suspended-users</description>
@@ -77,27 +78,38 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
         xml:space="preserve">
         List users statistics for this VO. (Requires VOMS Admin server >= 2.7.0)</help-string>
     </command>
+    
     <command
       name="create-user">
-      <description>create-user CERTIFICATE.PEM</description>
+      <description>[options] create-user CERTIFICATE.PEM</description>
       <help-string
         xml:space="preserve">
         Registers a new user in VOMS. 
         
-        If you use the --nousercert  option, then four parameters are 
+        Personal information can be specified with the following options:
+        name, surname, address, institution, phone-number.
+        
+        All these options must be provided when registering a new user, 
+        or no option regarding personal information should be set.
+        
+        Besides the personal information, information about user certificate
+        can be provided specifying a certificate file parameter.
+        
+        When using the --nousercert  option, then four parameters are 
         required (DN CA CN MAIL) to create the user. 
         
-        Otherwise these parameters are extracted automatically from the
-        certificate. 
-        
         Examples: 
+    
+        voms-admin --vo test --name Andrea --surname Ceccanti --institution IGI \\
+                   --phone-number 243 --address "My Address" \\
+                   create-user .globus/usercert.pem
         
         voms-admin --vo test_vo create-user .globus/usercert.pem 
         
         voms-admin --nousercert --vo test_vo create-user \ 
         'My DN' 'My CA' 'My CN' 'My Email'</help-string>
       <arg
-        type="X509" />
+        type="NewUser" />
     </command>
     <command
       name="delete-user">
@@ -170,16 +182,19 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
     </command>
     <command
       name="create-group">
-      <description>create-group GROUPNAME</description>
+      <description>[options] create-group GROUPNAME</description>
       <help-string xml:space="preserve">
         Creates a new group named GROUPNAME. 
+        
+        If the --description option is given, a description is registered
+        for the group in the VOMS database (requires VOMS Admin server >= 2.7.0).
         
         Note that the vo root group part of the fully qualified group name 
         can be omitted, i.e., if the group to be created is called /vo/ciccio, 
         where /vo is the vo root group, this command accepts both the "ciccio"
         and "/vo/ciccio" syntaxes.</help-string>
       <arg
-        type="Group" />
+        type="NewGroup" />
     </command>
     <command
       name="delete-group">

@@ -18,8 +18,7 @@
 #     Andrea Ceccanti (INFN)
 #
 
-import xml.dom.minidom, re, sys, os.path, urllib2, httplib
-import simplejson as json
+import xml.dom.minidom, re, sys, urllib2, httplib
 
 from VOMSAdminService import VOMSAdmin
 from VOMSAttributesService import VOMSAttributes
@@ -28,10 +27,15 @@ from VOMSCertificateService import VOMSCertificate
 from X509Helper import X509Helper
 from VOMSCommandsDef import commands_def
 from VOMSPermission import parse_permissions
-from VOMSAdmin import __version__, __commands__
-from xml.parsers.expat import ExpatError
+from VOMSAdmin import __version__
 from urllib2 import HTTPError, URLError
 import simplejson
+
+personal_info_arguments = ["name",
+                           "surname",
+                           "address",
+                           "institution",
+                           "phoneNumber"]
 
 class HTTPSClientAuthHandler(urllib2.HTTPSHandler):
 
@@ -45,7 +49,6 @@ class HTTPSClientAuthHandler(urllib2.HTTPSHandler):
 
     def getConnection(self, host):
         return httplib.HTTPSConnection(host, key_file=self.key, cert_file=self.cert)
-
 
 
 def command_argument_factory(type):
@@ -64,6 +67,10 @@ def command_argument_factory(type):
         return BooleanArgument()
     elif type == "Permission":
         return PermissionArgument()
+    elif type == "NewUser":
+        return NewUserArgument()
+    elif type == "NewGroup":
+        return NewGroupArgument()
     else:
         raise RuntimeError, "Argument type unknown!"
  
@@ -129,7 +136,50 @@ class X509Argument(CommandArgument):
             cert = X509Helper(args.pop(0))
             
             return [cert.subject,cert.issuer,None,cert.email]
+
+class NewUserArgument(X509Argument):
+    def __init__(self):
+        self.missing_arg_msg = "Missing user argument!"
+    
+    def has_personal_info_options(self, options):
         
+        has_all_args = True
+        has_some_args = False
+        
+        for a in personal_info_arguments:
+            if not options.has_key(a):
+                has_all_args = False
+            elif not has_some_args:
+                has_some_args = True    
+        
+        if has_some_args and not has_all_args:
+            raise RuntimeError, "Please specify *all* the following options when creating a user: %s" % ",".join(personal_info_arguments)
+        
+        return has_all_args
+        
+    
+    def create_user_from_personal_info(self, options):
+        usr = {}
+        for a in personal_info_arguments:
+            usr[a] = options[a]
+            
+        return usr 
+    
+    def parse(self, cmd, args, options):
+        
+        cert_args = X509Argument.parse(self, cmd, args, options)
+        user = None
+        result = []
+        
+        if self.has_personal_info_options(options):
+            user = self.create_user_from_personal_info(options)
+        
+        result.append(user)
+        result.extend(cert_args)
+         
+        return result
+
+
     
 class UserArgument(CommandArgument):
     def __init__(self):
@@ -160,7 +210,25 @@ class GroupArgument(CommandArgument):
             return ["/"+options['vo']]
         else:
             return [group]
+
+class NewGroupArgument(GroupArgument):
+    def __init__(self):
+        self.missing_arg_msg = "Missing user argument!"
     
+    def parse(self, cmd, args, options):
+        group_name = GroupArgument.parse(self, cmd, args, options)
+        group_desc = None
+        
+        result = []
+        
+        if options.has_key('description'):
+            group_desc = options['description']
+        
+        result.append(group_desc)
+        result.extend(group_name)
+        
+        return result
+        
 class RoleArgument(CommandArgument):
     def __init__(self):
         self.missing_arg_msg = "Missing role argument!"
@@ -330,9 +398,9 @@ class VOMSAdminProxy:
                                                             kw['port'],
                                                             kw['vo'])
         
-        self.rest_base_url = "https://%s:%s/voms/%s/ajax" % (kw['host'],
-                                                            kw['port'],
-                                                            kw['vo'])
+        self.rest_base_url = "https://%s:%s/voms/%s/apiv2" % (kw['host'],
+                                                              kw['port'],
+                                                              kw['vo'])
                 
         self.url_opener = urllib2.build_opener(HTTPSClientAuthHandler(key=kw['user_key'], cert=kw['user_cert']))
         
@@ -396,27 +464,54 @@ class VOMSAdminProxy:
             return "Default ACL not defined for group %s" % group
         else:
             return defaultACL
-    
-    def __httpGet(self, action):
+        
+    def __httpRequest(self, action, data=None):
         url = "%s/%s" % (self.rest_base_url, action)
         
-        try:
-            f = self.url_opener.open(url)
-        except HTTPError, e:
-            raise RuntimeError, "The server could not answer the request for %s. %s" % (url,e)
-        except URLError, e:
-            raise RuntimeError, "Error contacting remote server: %s. Error: %s" % (url, e)
+        req = urllib2.Request(url)
         
-        return simplejson.load(f) 
+        req.add_header('X-VOMS-CSRF-GUARD','')
+        
+        if data != None:
+            req.add_header('Content-Type', 'application/json')
+            req.add_data(simplejson.dumps(data))
+        
+        return req
+        
+    
+    def __httpCall(self, action, data=None):
+        
+        req = self.__httpRequest(action, data)
+        
+        try:
+            f = self.url_opener.open(req)
+        except HTTPError, e:
+            raise RuntimeError, "The server could not answer the request for %s. %s" % (req.get_full_url(),e)
+        except URLError, e:
+            raise RuntimeError, "Error contacting remote server: %s. Error: %s" % (req.get_full_url(), e)
+        
+        result = simplejson.load(f)
+        
+        return result 
+    
+    def __restCall(self, action, data=None):
+        res = self.__httpCall(action, data)
+        self.__handleCallReturnValue(res)
+
+    def __createUser(self,user,dn,ca):
+        self.__restCall('create-user.action', {'user':user, "certificateSubject": dn, "caSubject": ca})
+    
+    def __createGroup(self, name, description):
+        self.__restCall('create-group.action', {'groupName': name, 'groupDescription': description}) 
     
     def __getUserStats(self):
-        return self.__httpGet('user-stats.action')
+        return self.__httpCall('user-stats.action')
     
     def __getSuspendedUsers(self):
-        return self.__httpGet('suspended-users.action')
+        return self.__httpCall('suspended-users.action')
     
     def __getExpiredUsers(self):
-        return self.__httpGet('expired-users.action')
+        return self.__httpCall('expired-users.action')
     
     def __printUserList(self, user_list):
         for u in user_list:
@@ -434,6 +529,35 @@ class VOMSAdminProxy:
                 status = "Active."
                 
             print "%s (%d) - %s" % (name, u['id'],status)
+    
+    def __handleCallReturnValue(self, ret_val):        
+        if ret_val is None:
+            sys.exit(0)
+            return
+        
+        exit_status = 0
+        
+        if ret_val.has_key('exceptionClass'):
+            exit_status = 1
+            print >>sys.stderr, "%s : %s" % (ret_val['exceptionClass'], ret_val['exceptionMessage'])
+            
+        if ret_val.has_key('actionErrors'):
+            exit_status = 1
+            for i in ret_val['actionErrors']:
+                print >> sys.stderr, "Error: %s" % i 
+        
+        if ret_val.has_key('fieldErrors'):
+            exit_status = 1
+            for i in ret_val['fieldErrors'].values():
+                
+                print >> sys.stderr, "%s" % i[0]
+        
+        if ret_val.has_key('actionMessages'):
+            for i in ret_val['actionMessages']:
+                print i 
+        
+        if exit_status != 0:
+            sys.exit(exit_status)
         
     def countUsers(self):
         res = self.__getUserStats()
@@ -466,5 +590,24 @@ class VOMSAdminProxy:
         res = self.__getUserStats()
         for k in res.keys():
             print "%s = %s " % (k,res[k])
+    
+    def createUser(self,user,dn,ca,cn,email):
+        if user is None:
+            self.services['admin'].createUser(dn,ca,cn,email)
+        else:
+            if email is None or "" == email.strip():
+                raise RuntimeError, "Please provide an email for the user!"
+            user["emailAddress"] = email
+            res = self.__createUser(user, dn, ca)
+            self.__handleCallReturnValue(res)
+    
+    def createGroup(self,description,groupName):
+        if description is None:
+            self.services['admin'].createGroup(groupName)
+        else:
+            self.__createGroup(groupName, description)
+        
+        
+        
         
         

@@ -18,5 +18,5 @@
 # 	Andrea Ceccanti (INFN)
 #
 __version__ = "2.0.17"
-__commands__ = "/usr/share/voms-admin-client/voms-commands.xml"
+
 
