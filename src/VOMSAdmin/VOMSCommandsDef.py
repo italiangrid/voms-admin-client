@@ -62,7 +62,6 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
         xml:space="preserve">
         Counts how many VO users are currently suspended. (Requires VOMS Admin server >= 2.7.0)</help-string>
     </command>
-    
     <command
       name="count-users">
       <description>count-users</description>
@@ -88,6 +87,7 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
         
         Personal information can be specified with the following options:
         name, surname, address, institution, phone-number.
+        (Personal info submission requires VOMS Admin server >= 2.7.0)
         
         All these options must be provided when registering a new user, 
         or no option regarding personal information should be set.
@@ -109,8 +109,48 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
         voms-admin --nousercert --vo test_vo create-user \ 
         'My DN' 'My CA' 'My CN' 'My Email'</help-string>
       <arg
-        type="NewUser" />
+        type="X509v2" />
     </command>
+
+    <command
+      name="suspend-user">
+      <description>suspend-user USER REASON</description>
+      <help-string
+        xml:space="preserve">
+        Supends a VOMS user.
+        
+        USER is either an X509 certificate file in PEM format, 
+        or a DN, CA couple when the --nousercert option is set.
+        
+        (Requires VOMS Admin server >= 2.7.0)
+      </help-string>
+      <arg type="User"/>
+      <arg type="String"/>
+    </command>
+    
+    <command
+      name="restore-user">
+      <description>restore-user USER</description>
+      <help-string
+        xml:space="preserve">
+        Restores a VOMS user.
+        
+        USER is either an X509 certificate file in PEM format, 
+        or a DN, CA couple when the --nousercert option is set.
+        
+        (Requires VOMS Admin server >= 2.7.0)
+      </help-string>
+      <arg type="User"/>
+    </command>
+    
+    <command
+      name="restore-all-suspended-users">
+      <description>restore-all-suspended-users</description>
+      <help-string
+        xml:space="preserve">
+        Restores all the users currently suspended in the VOMS database. (Requires VOMS Admin server >= 2.7.0)</help-string>
+    </command>
+
     <command
       name="delete-user">
       <description>delete-user USER</description>

@@ -59,7 +59,8 @@ cmdline_long_options = ["host=",
                        "address=",
                        "institution=",
                        "phoneNumber=",
-                       "description="]
+                       "description=",
+                       "id="]
 
 options = {}
 

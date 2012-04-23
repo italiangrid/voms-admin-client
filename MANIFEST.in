@@ -1,3 +1,2 @@
 include CHANGELOG LICENSE README Makefile setup.py
-recursive-include src/VOMSAdmin/data *.xml
 recursive-include doc *.1

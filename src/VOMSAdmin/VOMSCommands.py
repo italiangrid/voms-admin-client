@@ -31,6 +31,7 @@ from VOMSAdmin import __version__
 from urllib2 import HTTPError, URLError
 import simplejson
 
+
 personal_info_arguments = ["name",
                            "surname",
                            "address",
@@ -47,7 +48,7 @@ class HTTPSClientAuthHandler(urllib2.HTTPSHandler):
     def https_open(self, req):
         return self.do_open(self.getConnection, req)
 
-    def getConnection(self, host):
+    def getConnection(self, host, timeout=None):
         return httplib.HTTPSConnection(host, key_file=self.key, cert_file=self.cert)
 
 
@@ -67,10 +68,12 @@ def command_argument_factory(type):
         return BooleanArgument()
     elif type == "Permission":
         return PermissionArgument()
-    elif type == "NewUser":
-        return NewUserArgument()
+    elif type == "X509v2":
+        return X509ArgumentV2()
     elif type == "NewGroup":
         return NewGroupArgument()
+    elif type == "UserV2":
+        return UserArgumentV2()
     else:
         raise RuntimeError, "Argument type unknown!"
  
@@ -137,7 +140,7 @@ class X509Argument(CommandArgument):
             
             return [cert.subject,cert.issuer,None,cert.email]
 
-class NewUserArgument(X509Argument):
+class X509ArgumentV2(X509Argument):
     def __init__(self):
         self.missing_arg_msg = "Missing user argument!"
     
@@ -197,7 +200,17 @@ class UserArgument(CommandArgument):
             self.check_length(cmd=cmd, args=args, min_length=1)
             cert = X509Helper(args.pop(0))
             return [cert.subject,cert.issuer]
-      
+
+class UserArgumentV2(UserArgument):
+    def __init__(self):
+        self.missing_arg_msg = "Missing user argument!"
+        
+    def parse(self, cmd, args, options):
+        
+        if options.has_key("id"):
+            return [options["id"], None, None]
+        else:
+            return [None, UserArgument.parse(self, cmd, args, options)]
 
 class GroupArgument(CommandArgument):
     def __init__(self):
@@ -488,7 +501,7 @@ class VOMSAdminProxy:
         except HTTPError, e:
             raise RuntimeError, "The server could not answer the request for %s. %s" % (req.get_full_url(),e)
         except URLError, e:
-            raise RuntimeError, "Error contacting remote server: %s. Error: %s" % (req.get_full_url(), e)
+            raise RuntimeError, "Error contacting remote server: %s. Error: %s" % (req.get_host(), e)
         
         result = simplejson.load(f)
         
@@ -497,12 +510,24 @@ class VOMSAdminProxy:
     def __restCall(self, action, data=None):
         res = self.__httpCall(action, data)
         self.__handleCallReturnValue(res)
+        return res
+
+    def __suspendUser(self, dn, ca, reason):
+        return self.__restCall('suspend-user.action', {"certificateSubject": dn, 
+                                                       "caSubject": ca, 
+                                                       "suspensionReason": reason})
+    
+    def __restoreAllSuspendedUsers(self):
+        return self.__restCall('restore-all-suspended-users.action')
+        
+    def __restoreUser(self, dn, ca):
+        return self.__restCall('restore-user.action', {"certificateSubject": dn, "caSubject": ca})
 
     def __createUser(self,user,dn,ca):
-        self.__restCall('create-user.action', {'user':user, "certificateSubject": dn, "caSubject": ca})
+        return self.__restCall('create-user.action', {'user':user, "certificateSubject": dn, "caSubject": ca})
     
     def __createGroup(self, name, description):
-        self.__restCall('create-group.action', {'groupName': name, 'groupDescription': description}) 
+        return self.__restCall('create-group.action', {'groupName': name, 'groupDescription': description}) 
     
     def __getUserStats(self):
         return self.__httpCall('user-stats.action')
@@ -516,19 +541,19 @@ class VOMSAdminProxy:
     def __printUserList(self, user_list):
         for u in user_list:
             
-            name = "%s %s" %(u['name'],u['surname'])
-                
-            if len(u['name']) == 0 and len(u['surname']) == 0:
-                ## Use certificate subject if name is not defined for this
-                ## user
-                name = u['certificates'][0]['subjectString']
+            cert = "%s,%s" %(u['certificates'][0]['subjectString'],u['certificates'][0]['issuerString'])
             
             if u['suspended']:
-                status = "Suspended.  Reason: %s" % u['suspensionReason']
+                status = "Suspended: %s" % u['suspensionReason']
             else:
-                status = "Active."
-                
-            print "%s (%d) - %s" % (name, u['id'],status)
+                status = "Active"
+            
+            if u['name'] != None and u['surname'] != None:
+                name = "%s %s (%d)" % (u['name'], u['surname'], u['id'])
+            else:
+                name = ""
+            
+            print "%s,%s,%s" % (cert, status, name)
     
     def __handleCallReturnValue(self, ret_val):        
         if ret_val is None:
@@ -608,6 +633,18 @@ class VOMSAdminProxy:
             self.__createGroup(groupName, description)
         
         
-        
+    def suspendUser(self, dn, ca, reason):
+        self.__suspendUser(dn, ca, reason)
+    
+    def restoreUser(self, dn, ca):
+        self.__restoreUser(dn,ca)
+    
+    def restoreAllSuspendedUsers(self):
+        res = self.__restoreAllSuspendedUsers()
+        if len(res['restoredUsers']) == 0:
+            print "No users were restored."
+        else:
+            print "The following user's membership has been restored:"
+            self.__printUserList(res['restoredUsers'])
         
         
