@@ -623,8 +623,7 @@ class VOMSAdminProxy:
             if email is None or "" == email.strip():
                 raise RuntimeError, "Please provide an email for the user!"
             user["emailAddress"] = email
-            res = self.__createUser(user, dn, ca)
-            self.__handleCallReturnValue(res)
+            self.__createUser(user, dn, ca)
     
     def createGroup(self,description,groupName):
         if description is None:

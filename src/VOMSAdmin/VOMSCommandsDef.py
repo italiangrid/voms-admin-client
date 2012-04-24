@@ -101,7 +101,7 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
         Examples: 
     
         voms-admin --vo test --name Andrea --surname Ceccanti --institution IGI \\
-                   --phone-number 243 --address "My Address" \\
+                   --phoneNumber 243 --address "My Address" \\
                    create-user .globus/usercert.pem
         
         voms-admin --vo test_vo create-user .globus/usercert.pem 
