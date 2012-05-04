@@ -28,8 +28,8 @@ from VOMSAttributesService_services_types import *
 import urlparse, types
 from ZSI.TCcompound import ComplexType, Struct
 from ZSI import client
-from AttributesFix import *
 import ZSI
+import AttributesFix
 
 # Locator
 class VOMSAttributesServiceLocator:
@@ -50,13 +50,13 @@ class VOMSAttributesSoapBindingSOAP:
 
     # op: createAttributeClass
     def createAttributeClass(self, request):
-        if isinstance(request, createAttributeClassRequest) is False:
+        if isinstance(request, AttributesFix.createAttributeClassRequest) is False:
             raise TypeError, "%s incorrect request type" % (request.__class__)
         kw = {}
         # no input wsaction
         self.binding.Send(None, None, request, soapaction="", encodingStyle="http://schemas.xmlsoap.org/soap/encoding/", **kw)
         # no output wsaction
-        typecode = Struct(pname=None, ofwhat=createAttributeClassResponse.typecode.ofwhat, pyclass=createAttributeClassResponse.typecode.pyclass)
+        typecode = Struct(pname=None, ofwhat=AttributesFix.createAttributeClassResponse.typecode.ofwhat, pyclass=AttributesFix.createAttributeClassResponse.typecode.pyclass)
         response = self.binding.Receive(typecode)
         return response
 
@@ -86,13 +86,13 @@ class VOMSAttributesSoapBindingSOAP:
 
     # op: deleteAttributeClass
     def deleteAttributeClass(self, request):
-        if isinstance(request, deleteAttributeClassRequest) is False:
+        if isinstance(request, AttributesFix.deleteAttributeClassRequest) is False:
             raise TypeError, "%s incorrect request type" % (request.__class__)
         kw = {}
         # no input wsaction
         self.binding.Send(None, None, request, soapaction="", encodingStyle="http://schemas.xmlsoap.org/soap/encoding/", **kw)
         # no output wsaction
-        typecode = Struct(pname=None, ofwhat=deleteAttributeClassResponse.typecode.ofwhat, pyclass=deleteAttributeClassResponse.typecode.pyclass)
+        typecode = Struct(pname=None, ofwhat=AttributesFix.deleteAttributeClassResponse.typecode.ofwhat, pyclass=AttributesFix.deleteAttributeClassResponse.typecode.pyclass)
         response = self.binding.Receive(typecode)
         return response
 
@@ -135,13 +135,13 @@ class VOMSAttributesSoapBindingSOAP:
 
     # op: deleteUserAttribute
     def deleteUserAttribute(self, request):
-        if isinstance(request, deleteUserAttributeRequest) is False:
+        if isinstance(request, AttributesFix.deleteUserAttributeRequest) is False:
             raise TypeError, "%s incorrect request type" % (request.__class__)
         kw = {}
         # no input wsaction
         self.binding.Send(None, None, request, soapaction="", encodingStyle="http://schemas.xmlsoap.org/soap/encoding/", **kw)
         # no output wsaction
-        typecode = Struct(pname=None, ofwhat=deleteUserAttributeResponse.typecode.ofwhat, pyclass=deleteUserAttributeResponse.typecode.pyclass)
+        typecode = Struct(pname=None, ofwhat=AttributesFix.deleteUserAttributeResponse.typecode.ofwhat, pyclass=AttributesFix.deleteUserAttributeResponse.typecode.pyclass)
         response = self.binding.Receive(typecode)
         return response
 
