@@ -60,7 +60,8 @@ cmdline_long_options = ["host=",
                        "institution=",
                        "phoneNumber=",
                        "description=",
-                       "id="]
+                       "id=",
+                       "service-endpoints-dir="]
 
 options = {}
 
@@ -131,13 +132,15 @@ def usage():
 voms-admin v. %s
 
 Usage:
-     voms-admin [OPTIONS] --vo=NAME [--host HOST] [--port PORT] COMMAND PARAM...
+     voms-admin [OPTIONS] --vo=NAME [--host HOST] [--port PORT] COMMAND PARAM [COMMAND PARAM...]
 
 Options:
      --help              Print this short help message.
-         
+     
      --list-commands     Print a list of available commands.
-     --help-command CMD  Print help about command CMD. 
+     
+     --help CMD, --help-command CMD
+                         Print help about command CMD. 
      
      --help-commands     Print help for all available commands.
      
@@ -145,17 +148,23 @@ Options:
 
      --verbose       Print more messages.
      
-     --nousercert        Don't extract DNs from supplied certificates.
+     --nousercert        Parse x.509 certificate info from command line arguments.
      
 
 Service access parameters:
-     --vo NAME           Connect to the NAME VO.  (No default.)
+     --vo VO             Administer the vo named VO.  (No default.)
 
      --host HOSTNAME     Use the VOMS Admin service running on HOSTNAME.
-                         (Default is localhost.)
+                         (Default is localhost, unless overrding by endpoint configuration)
 
-                         (Default is 8443.)
+                         
      --port PORT         Use the VOMS Admin service running on PORT.
+                         (Default is 8443, unless overridden by endpoint configuration)
+    
+    --service-endpoints-dir DIR
+                         Looks for endpoint information in the DIR passed
+                         as argument. By default VOMS Admin looks for endpoint information
+                         in /etc/voms-admin
 
 Examples:
     voms-admin --vo MyFavouriteVO list-users
@@ -222,9 +231,28 @@ def execute_command(cmd):
         if not res is None:
             print unicode(res)
 
+def local_endpoint_conf_path():
+    return "%s/%s/service-endpoint"  % (options['service-endpoints-dir'],
+                                        options['vo'])
 
-
+def get_endpoint_from_local_conf():
+     
+    if os.path.exists(local_endpoint_conf_path()):
+        f = open(local_endpoint_conf_path(), "r")
+        endpoint = f.read()
+        if ':' in endpoint:
+            return endpoint.split(':')
+    
+    return (None,None)
+        
+    
 def check_options(args):
+    
+    if not options.has_key('service-endpoints-dir'):
+        if os.environ.has_key("VOMS_LOCATION"):
+            options['service-endpoints-dir'] = os.path.join(os.environ["VOMS_LOCATION"],"etc","voms-admin")
+        else:
+            options['service-endpoints-dir'] = "/etc/voms-admin"
     
     if options.has_key("help") or options.has_key("h"):
         
@@ -260,11 +288,17 @@ def check_options(args):
         print "No vo specified!"
         sys.exit(1)
     
+    if os.path.exists(local_endpoint_conf_path()):
+        (endpoint_host, endpoint_port)  = get_endpoint_from_local_conf()
+    else:
+        endpoint_host = "localhost"
+        endpoint_port = "8443"
+    
     if not options.has_key("host"):
-        options['host'] = 'localhost'
+        options['host'] = endpoint_host
         
     if not options.has_key("port"):
-        options['port'] = 8443
+        options['port'] = int(endpoint_port)
     
 
 def parse_command_line():

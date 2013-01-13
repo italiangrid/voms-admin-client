@@ -41,7 +41,7 @@ class VOMSAdmin:
             sys.exit(3)
         
         except error, e:
-            print "Socket error: ", e
+            print "Socket error contacting %s: %s" % (self.port.binding.url, e)
             sys.exit(2)
             
         except ZSI.FaultException, ex:
