@@ -1,3 +1,7 @@
+---+ 2.0.18
+
+* Support for voms-admin endpoint resolution
+
 ---+ 2.0.17 
 
 * Refactored packaging so that no environment variable is needed and
