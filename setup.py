@@ -25,7 +25,7 @@ The voms-admin command line tool provides access to the most common VOMS Admin s
 """
 
 setup(name='voms-admin-client',
-      version=__version__,
+      version='2.0.18',
       author="Andrea Ceccanti",
       author_email="andrea.ceccanti@cnaf.infn.it",
       maintainer="Andrea Ceccanti",
