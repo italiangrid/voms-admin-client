@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 
 #############################################################################
 # Copyright (c) Members of the EGEE Collaboration. 2006.
@@ -40,6 +40,7 @@ print_command_help,print_supported_commands_help
 
 from VOMSAdmin.VOMSAdminService import VOMSAdmin
 from VOMSAdmin import VOMSAdminService_services_types, __version__
+from VOMSAdmin.X509Helper import X509Helper
 
 cmdline_long_options = ["host=",
                         "port=",
@@ -214,7 +215,9 @@ def setup_identity():
             vlog("using credentials found in $HOME/.globus...")
             options['user_cert'] = os.path.join(os.environ['HOME'],".globus", "usercert.pem")
             options['user_key'] = os.path.join(os.environ['HOME'],".globus", "userkey.pem")
-            
+    
+    helper=X509Helper(options['user_cert'])
+    vlog(helper)    
           
 def execute_command(cmd):
     
@@ -333,8 +336,8 @@ def parse_command_line():
 def main():   
     
     try:
-        setup_identity()    
         user_commands = parse_command_line()
+        setup_identity()    
         
         for c in user_commands:
             
