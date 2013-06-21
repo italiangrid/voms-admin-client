@@ -7,7 +7,7 @@
 %global pydotver %(%{__python} -c "import sys; print sys.version[:3]")
 
 Name: voms-admin-client
-Version: 2.0.18
+Version: 2.0.19
 Release: 1%{?dist}
 Summary: The VOMS administration service command line tool
 
@@ -82,6 +82,9 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Fri Jun 21 2013 Daniele Andreotti <daniele.andreotti at cnaf.infn.it> - 2.0.19-1
+- Fix for https://issues.infn.it/jira/browse/VOMS-144
+
 * Sat Jan 12 2013 Andrea Ceccanti <andrea.ceccanti at cnaf.infn.it> - 2.0.18-1
 - Added support for VOMS Admin service endpoint parsing from local configuration
 
