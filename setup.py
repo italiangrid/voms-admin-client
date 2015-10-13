@@ -15,8 +15,8 @@ The voms-admin command line tool provides access to most common VOMS administrat
 """
 
 LONG_DES="""
-The Virtual Organization Membership Service is a Grid attribute authority which serves as central repository for VO user authorization information, 
-providing support for sorting users into group hierarchies, keeping track of their roles and other attributes in order to issue trusted attribute certificates 
+The Virtual Organization Membership Service is a Grid attribute authority which serves as central repository for VO user authorization information,
+providing support for sorting users into group hierarchies, keeping track of their roles and other attributes in order to issue trusted attribute certificates
 and assertions used in the Grid environment for authorization purposes.
 
 The VOMS Admin service is a web application providing tools for administering the VOMS VO structure. It provides an intuitive web user interface for daily administration tasks
@@ -25,7 +25,7 @@ The voms-admin command line tool provides access to the most common VOMS Admin s
 """
 
 setup(name='voms-admin-client',
-      version='2.0.19',
+      version='2.0.20',
       author="Andrea Ceccanti",
       author_email="andrea.ceccanti@cnaf.infn.it",
       maintainer="Andrea Ceccanti",
