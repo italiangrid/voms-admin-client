@@ -20,9 +20,21 @@
 # Authors:
 #     Andrea Ceccanti - andrea.ceccanti@cnaf.infn.it
 #############################################################################
-import string, getopt, sys, os, os.path, types
+from VOMSAdmin.VOMSCommands import supported_commands, UserCommand, parse_commands, \
+    VOMSAdminProxy, print_supported_commands, print_version, \
+    print_command_help, print_supported_commands_help
+from VOMSAdmin.X509Helper import X509Helper
+from VOMSAdmin import VOMSAdminService_services_types, __version__
+from VOMSAdmin.VOMSAdminService import VOMSAdmin
+import string
+import getopt
+import sys
+import os
+import os.path
+import types
 
 voms_admin_default_encoding = 'utf-8'
+
 
 class EncodedStreamWriter:
     def __init__(self, writer):
@@ -31,47 +43,44 @@ class EncodedStreamWriter:
     def write(self, s):
         self.writer.write(s.encode(voms_admin_default_encoding))
 
+
 sys.stdout = EncodedStreamWriter(sys.stdout)
 sys.stderr = EncodedStreamWriter(sys.stderr)
 
-from VOMSAdmin.VOMSCommands import supported_commands,UserCommand,parse_commands, \
-VOMSAdminProxy, print_supported_commands, print_version, \
-print_command_help,print_supported_commands_help
-
-from VOMSAdmin.VOMSAdminService import VOMSAdmin
-from VOMSAdmin import VOMSAdminService_services_types, __version__
-from VOMSAdmin.X509Helper import X509Helper
 
 cmdline_long_options = ["host=",
                         "port=",
-                       "vo=",
-                       "version",
-                       "verbose",
-                       "quiet",
-                       "nousercert",
-                       "ssl",
-                       "help",
-                       "help-acl",
-                       "help-commands",
-                       "list-commands",
-                       "help-command=",
-                       "name=",
-                       "surname=",
-                       "address=",
-                       "institution=",
-                       "phoneNumber=",
-                       "description=",
-                       "id=",
-                       "service-endpoints-dir="]
+                        "vo=",
+                        "version",
+                        "verbose",
+                        "quiet",
+                        "nousercert",
+                        "ssl",
+                        "help",
+                        "help-acl",
+                        "help-commands",
+                        "list-commands",
+                        "help-command=",
+                        "name=",
+                        "surname=",
+                        "address=",
+                        "institution=",
+                        "phoneNumber=",
+                        "description=",
+                        "id=",
+                        "service-endpoints-dir=",
+                        "capath="]
 
 options = {}
 
 user_cert = None
 user_key = None
 
+
 def vlog(msg):
     if options.has_key("verbose"):
         print msg
+
 
 def help_acl():
 
@@ -128,6 +137,7 @@ the VOMS Admin user's guide and the help of the ACL management commands.
 """
     print help_acl_str
 
+
 def usage():
     usage_str = """
 voms-admin v. %s
@@ -151,6 +161,8 @@ Options:
 
      --nousercert        Parse x.509 certificate info from command line arguments.
 
+     --capath           Path to X.509 trusted certificate path.
+                        Default: "/etc/grid-security/certificates"
 
 Service access parameters:
      --vo VO             Administer the vo named VO.  (No default.)
@@ -179,13 +191,15 @@ Examples:
 """ % (__version__)
     print usage_str
 
+
 def setup_identity():
     user_id = os.geteuid()
 
     proxy_fname = "/tmp/x509up_u%d" % user_id
 
     if os.environ.has_key("X509_USER_PROXY"):
-        vlog("using user credentials found in %s" % os.environ['X509_USER_PROXY'])
+        vlog("using user credentials found in %s" %
+             os.environ['X509_USER_PROXY'])
         options['user_cert'] = os.environ['X509_USER_PROXY']
         options['user_key'] = os.environ['X509_USER_PROXY']
 
@@ -200,17 +214,20 @@ def setup_identity():
         options['user_key'] = os.environ['X509_USER_KEY']
     else:
         if user_id == 0:
-            ## we are running as root, use host certificate
+            # we are running as root, use host certificate
             vlog("Running as root, using the host certificate")
             options['user_cert'] = "/etc/grid-security/hostcert.pem"
             options['user_key'] = "/etc/grid-security/hostkey.pem"
         else:
             vlog("using credentials found in $HOME/.globus...")
-            options['user_cert'] = os.path.join(os.environ['HOME'],".globus", "usercert.pem")
-            options['user_key'] = os.path.join(os.environ['HOME'],".globus", "userkey.pem")
+            options['user_cert'] = os.path.join(
+                os.environ['HOME'], ".globus", "usercert.pem")
+            options['user_key'] = os.path.join(
+                os.environ['HOME'], ".globus", "userkey.pem")
 
-    helper=X509Helper(options['user_cert'])
+    helper = X509Helper(options['user_cert'])
     vlog(helper)
+
 
 def execute_command(cmd):
 
@@ -218,18 +235,20 @@ def execute_command(cmd):
     if cmd.arg_list is None:
         res = admin.call_method(cmd.name)
     else:
-        res = admin.call_method(cmd.name,*cmd.arg_list)
+        res = admin.call_method(cmd.name, *cmd.arg_list)
 
-    if isinstance(res, types.ListType ):
+    if isinstance(res, types.ListType):
         for i in res:
             print unicode(i)
     else:
         if not res is None:
             print unicode(res)
 
+
 def local_endpoint_conf_path():
-    return "%s/%s/service-endpoint"  % (options['service-endpoints-dir'],
-                                        options['vo'])
+    return "%s/%s/service-endpoint" % (options['service-endpoints-dir'],
+                                       options['vo'])
+
 
 def get_endpoint_from_local_conf():
 
@@ -239,14 +258,18 @@ def get_endpoint_from_local_conf():
         if ':' in endpoint:
             return endpoint.split(':')
 
-    return (None,None)
+    return (None, None)
 
 
 def check_options(args):
 
+    if not options.has_key('capath'):
+        options['capath'] = "/etc/grid-security/certificates"
+
     if not options.has_key('service-endpoints-dir'):
         if os.environ.has_key("VOMS_LOCATION"):
-            options['service-endpoints-dir'] = os.path.join(os.environ["VOMS_LOCATION"],"etc","voms-admin")
+            options['service-endpoints-dir'] = os.path.join(
+                os.environ["VOMS_LOCATION"], "etc", "voms-admin")
         else:
             options['service-endpoints-dir'] = "/etc/voms-admin"
 
@@ -267,7 +290,6 @@ def check_options(args):
         print_supported_commands()
         sys.exit(0)
 
-
     if options.has_key("help-commands"):
         print_supported_commands_help()
         sys.exit(0)
@@ -285,7 +307,7 @@ def check_options(args):
         sys.exit(1)
 
     if os.path.exists(local_endpoint_conf_path()):
-        (endpoint_host, endpoint_port)  = get_endpoint_from_local_conf()
+        (endpoint_host, endpoint_port) = get_endpoint_from_local_conf()
     else:
         endpoint_host = "localhost"
         endpoint_port = "8443"
@@ -304,12 +326,12 @@ def parse_command_line():
 
         user_commands = []
 
-        opts,args = getopt.getopt(sys.argv[1:],
-                                  "",
-                                  cmdline_long_options)
+        opts, args = getopt.getopt(sys.argv[1:],
+                                   "",
+                                   cmdline_long_options)
 
-        for key,val in opts:
-            options[key[2:]]=val
+        for key, val in opts:
+            options[key[2:]] = val
 
         check_options(args)
 
@@ -325,12 +347,13 @@ def parse_command_line():
         sys.exit(1)
 
 
-
 def main():
 
     try:
         user_commands = parse_command_line()
         setup_identity()
+
+        os.environ['SSL_CERT_DIR'] = options['capath']
 
         for c in user_commands:
 
