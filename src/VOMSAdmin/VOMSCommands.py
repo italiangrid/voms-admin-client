@@ -29,8 +29,11 @@ from VOMSCommandsDef import commands_def
 from VOMSPermission import parse_permissions
 from VOMSAdmin import __version__
 from urllib2 import HTTPError, URLError
-import simplejson
 
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 personal_info_arguments = ["name",
                            "surname",
@@ -485,7 +488,7 @@ class VOMSAdminProxy:
 
         if data != None:
             req.add_header('Content-Type', 'application/json')
-            req.add_data(simplejson.dumps(data))
+            req.add_data(json.dumps(data))
 
         return req
 
@@ -501,7 +504,7 @@ class VOMSAdminProxy:
         except URLError, e:
             raise RuntimeError, "Error contacting remote server: %s. Error: %s" % (req.get_host(), e)
 
-        result = simplejson.load(f)
+        result = json.load(f)
 
         return result
 
@@ -638,7 +641,7 @@ class VOMSAdminProxy:
         if res is None:
             print "No user found for the given parameters"
         else:
-            print simplejson.dumps(res)
+            print json.dumps(res)
 
     def createUser(self,user,dn,ca,cn,email):
         if user is None:
