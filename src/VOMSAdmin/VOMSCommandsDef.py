@@ -18,7 +18,7 @@
 # 	Andrea Ceccanti (INFN)
 #
 
-commands_def="""<?xml version="1.0" encoding="UTF-8"?>
+commands_def = """<?xml version="1.0" encoding="UTF-8"?>
 <voms-commands>
   <command-group
     name="User management commands"
@@ -864,15 +864,7 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
         <description>list-all-suspended-certificates</description>
         <help-string
           xml:space="preserve">
-          Lists all certificates in the VO users that are currently suspended. (Requires VOMS Admin server >= 2.7.0)</help-string>
-      </command>
-
-      <command
-        name="count-all-suspended-certificates">
-        <description>count-all-suspended-certificates</description>
-        <help-string
-          xml:space="preserve">
-          Counts how many certificates in the VO users are currently suspended. (Requires VOMS Admin server >= 2.7.0)</help-string>
+          Lists all the VO user certificates that are currently suspended.V</help-string>
       </command>
 
   </command-group>

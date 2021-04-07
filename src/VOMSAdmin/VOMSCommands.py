@@ -18,7 +18,11 @@
 #     Andrea Ceccanti (INFN)
 #
 
-import xml.dom.minidom, re, sys, urllib2, httplib
+import xml.dom.minidom
+import re
+import sys
+import urllib2
+import httplib
 
 from VOMSAdminService import VOMSAdmin
 from VOMSAttributesService import VOMSAttributes
@@ -40,6 +44,7 @@ personal_info_arguments = ["name",
                            "address",
                            "institution",
                            "phoneNumber"]
+
 
 class HTTPSClientAuthHandler(urllib2.HTTPSHandler):
 
@@ -80,6 +85,7 @@ def command_argument_factory(type):
     else:
         raise RuntimeError, "Argument type unknown!"
 
+
 class CommandArgument:
     def __init__(self):
         self.value = None
@@ -98,13 +104,15 @@ class CommandArgument:
             raise RuntimeError, self.missing_arg_msg
 
         for i in args[:min_length]:
-            if unicode(i,'utf-8') in supported_commands.keys():
-                raise RuntimeError, "Found command '%s' while parsing arguments for command '%s'!" % (i,cmd.name)
+            if unicode(i, 'utf-8') in supported_commands.keys():
+                raise RuntimeError, "Found command '%s' while parsing arguments for command '%s'!" % (
+                    i, cmd.name)
 
 
 class StringArgument(CommandArgument):
     def __init__(self):
         self.missing_arg_msg = "Missing string argument!"
+
 
 class BooleanArgument(CommandArgument):
     def __init__(self):
@@ -135,13 +143,14 @@ class X509Argument(CommandArgument):
             cn = args.pop(0)
             mail = args.pop(0)
 
-            return [dn,ca,cn,mail]
+            return [dn, ca, cn, mail]
         else:
 
             self.check_length(cmd=cmd, args=args, min_length=1)
             cert = X509Helper(args.pop(0))
 
-            return [cert.subject,cert.issuer,None,cert.email]
+            return [cert.subject, cert.issuer, None, cert.email]
+
 
 class X509ArgumentV2(X509Argument):
     def __init__(self):
@@ -159,10 +168,10 @@ class X509ArgumentV2(X509Argument):
                 has_some_args = True
 
         if has_some_args and not has_all_args:
-            raise RuntimeError, "Please specify *all* the following options when creating a user: %s" % ",".join(personal_info_arguments)
+            raise RuntimeError, "Please specify *all* the following options when creating a user: %s" % ",".join(
+                personal_info_arguments)
 
         return has_all_args
-
 
     def create_user_from_personal_info(self, options):
         usr = {}
@@ -197,11 +206,12 @@ class UserArgument(CommandArgument):
             self.check_length(cmd, args, 2)
             dn = args.pop(0)
             ca = args.pop(0)
-            return [dn,ca]
+            return [dn, ca]
         else:
             self.check_length(cmd=cmd, args=args, min_length=1)
             cert = X509Helper(args.pop(0))
-            return [cert.subject,cert.issuer]
+            return [cert.subject, cert.issuer]
+
 
 class UserArgumentV2(UserArgument):
     def __init__(self):
@@ -214,17 +224,19 @@ class UserArgumentV2(UserArgument):
         else:
             return [None, UserArgument.parse(self, cmd, args, options)]
 
+
 class GroupArgument(CommandArgument):
     def __init__(self):
         self.missing_arg_msg = "Missing group argument!"
 
-    def parse(self,cmd,args, options):
+    def parse(self, cmd, args, options):
         self.check_length(cmd, args, 1)
         group = args.pop(0)
         if group.strip() == "VO":
             return ["/"+options['vo']]
         else:
             return [group]
+
 
 class NewGroupArgument(GroupArgument):
     def __init__(self):
@@ -244,6 +256,7 @@ class NewGroupArgument(GroupArgument):
 
         return result
 
+
 class RoleArgument(CommandArgument):
     def __init__(self):
         self.missing_arg_msg = "Missing role argument!"
@@ -256,13 +269,14 @@ class RoleArgument(CommandArgument):
         else:
             return [role]
 
+
 class PermissionArgument(CommandArgument):
     def __init__(self):
         self.missing_arg_msg = "Missing permission argument!"
 
     def parse(self, cmd, args, options):
         self.check_length(cmd, args, 1)
-        perm_str  = args.pop(0)
+        perm_str = args.pop(0)
         permission = parse_permissions(perm_str)
 
         return [permission.bits]
@@ -274,10 +288,10 @@ class Command:
         self.desc = desc
         self.arg_types = []
         self.help_str = help_str
-        self.group_name=None
-        self.group_short_name=None
+        self.group_name = None
+        self.group_short_name = None
 
-    def add_arg(self,arg):
+    def add_arg(self, arg):
         self.arg_types.append(arg)
 
     def num_args(self):
@@ -286,22 +300,24 @@ class Command:
     def __repr__(self):
 
         return "%s(%s)" % (self.name,
-                              ",".join([e.__class__.__name__ for e in self.arg_types]))
+                           ",".join([e.__class__.__name__ for e in self.arg_types]))
 
 
 class UserCommand(Command):
-    def __init__(self,cmd, arg_list=[]):
+    def __init__(self, cmd, arg_list=[]):
         Command.__init__(self, cmd.name, cmd.desc, cmd.help_str)
         self.arg_types = cmd.arg_types
         self.arg_list = arg_list
 
-    def parse_args(self,cmd_line, options=None):
+    def parse_args(self, cmd_line, options=None):
 
         for i in self.arg_types:
-            self.arg_list= self.arg_list + i.parse(cmd=self,args=cmd_line,options=options)
+            self.arg_list = self.arg_list + \
+                i.parse(cmd=self, args=cmd_line, options=options)
 
     def help(self):
         return "Usage:\n%s\n\t%s\n" % (self.desc, self.help_str)
+
 
 def _parse_commands():
 
@@ -332,7 +348,7 @@ def _parse_commands():
                     _arg = command_argument_factory(child.getAttribute("type"))
                     cmd.add_arg(_arg)
 
-        ## Get command group from parent node
+        # Get command group from parent node
         if not (c.parentNode is None):
             cmd.group_name = c.parentNode.getAttribute("name")
 
@@ -341,33 +357,33 @@ def _parse_commands():
             else:
                 grouped_commands_hash[cmd.group_name] = [cmd]
 
-        command_hash[cmd.name]= cmd
-
-
+        command_hash[cmd.name] = cmd
 
     return command_hash, grouped_commands_hash
 
+
 supported_commands, grouped_commands = _parse_commands()
+
 
 def print_version():
     print "voms-admin v.", __version__
+
 
 def print_supported_commands():
     print "Supported commands list:"
     print
     for group in grouped_commands.keys():
 
-        print group.upper()+":\n\n", "\n".join(["  "+c.name for c in grouped_commands[group]])
+        print group.upper() + \
+            ":\n\n", "\n".join(["  "+c.name for c in grouped_commands[group]])
         print
+
 
 def print_supported_commands_help():
     print "Supported commands and usage info:"
     print
-#    for v in supported_commands.values():
-#        print v.desc
-#        print "\t", v.help_str
     for group in grouped_commands.keys():
-        print group.upper(),":\n\n"
+        print group.upper(), ":\n\n"
         for c in grouped_commands[group]:
             print c.desc
             print c.help_str
@@ -380,9 +396,10 @@ def unknown_command(cmd):
     print "To get a list of supported commands, type:\n\n\tvoms-admin --list-commands"
     sys.exit(1)
 
+
 def print_command_help(cmd):
     if not supported_commands.has_key(cmd):
-            unknown_command(cmd)
+        unknown_command(cmd)
 
     c = supported_commands[cmd]
     print
@@ -390,10 +407,11 @@ def print_command_help(cmd):
     print "\t", c.help_str
     print
 
+
 def parse_commands(args, options):
     commands = []
 
-    while len(args)>0:
+    while len(args) > 0:
 
         cmd = args.pop(0).strip()
         if not supported_commands.has_key(cmd):
@@ -406,8 +424,9 @@ def parse_commands(args, options):
 
     return commands
 
+
 class VOMSAdminProxy:
-    def __init__(self,*args, **kw):
+    def __init__(self, *args, **kw):
         self.base_url = "https://%s:%s/voms/%s/services" % (kw['host'],
                                                             kw['port'],
                                                             kw['vo'])
@@ -416,47 +435,42 @@ class VOMSAdminProxy:
                                                               kw['port'],
                                                               kw['vo'])
 
-        self.url_opener = urllib2.build_opener(HTTPSClientAuthHandler(key=kw['user_key'], cert=kw['user_cert']))
+        self.url_opener = urllib2.build_opener(
+            HTTPSClientAuthHandler(key=kw['user_key'], cert=kw['user_cert']))
 
         transdict = {
-                     "cert_file":kw['user_cert'],
-                     "key_file":kw['user_key']
-                     }
-
+            "cert_file": kw['user_cert'],
+            "key_file": kw['user_key']
+        }
 
         self.services = {
-                         "admin": VOMSAdmin(url=self.base_url+"/VOMSAdmin", transdict=transdict),
-                         "attributes": VOMSAttributes(url=self.base_url+"/VOMSAttributes", transdict=transdict),
-                         "acl": VOMSACL(url=self.base_url+"/VOMSACL", transdict=transdict),
-                         "certificates": VOMSCertificate(url=self.base_url+"/VOMSCertificates", transdict=transdict)
-                         }
-
+            "admin": VOMSAdmin(url=self.base_url+"/VOMSAdmin", transdict=transdict),
+            "attributes": VOMSAttributes(url=self.base_url+"/VOMSAttributes", transdict=transdict),
+            "acl": VOMSACL(url=self.base_url+"/VOMSACL", transdict=transdict),
+            "certificates": VOMSCertificate(url=self.base_url+"/VOMSCertificates", transdict=transdict)
+        }
 
         for s in self.services.values():
             s.port.binding.AddHeader("X-VOMS-CSRF-GUARD", "")
-
-
 
     def transname(self, method_name):
         def f(m):
             return m.group(2).upper()
 
-        return re.sub("(-(.))",f,method_name)
-
+        return re.sub("(-(.))", f, method_name)
 
     def call_method(self, method_name, *args, **kw):
         mn = self.transname(method_name)
 
         if self.__class__.__dict__.has_key(mn):
-            return self.__class__.__dict__[mn](self,*args,**kw)
+            return self.__class__.__dict__[mn](self, *args, **kw)
 
         else:
             for service in self.services.values():
                 if service.__class__.__dict__.has_key(mn):
                     return service.__class__.__dict__[mn](service, *args, **kw)
 
-            raise RuntimeError, "Unkown method '%s'!" %mn
-
+            raise RuntimeError, "Unkown method '%s'!" % mn
 
     def listUsers(self):
         users = self.services["admin"].listUsers()
@@ -465,14 +479,14 @@ class VOMSAdminProxy:
 
         return users
 
-    def listMembers(self,group):
+    def listMembers(self, group):
         members = self.services["admin"].listMembers(group)
         if members is None:
             return "No members found in group %s" % group
         else:
             return members
 
-    def getDefaultACL(self,group):
+    def getDefaultACL(self, group):
         defaultACL = self.services["acl"].getDefaultACL(group)
         if defaultACL is None:
             return "Default ACL not defined for group %s" % group
@@ -484,14 +498,13 @@ class VOMSAdminProxy:
 
         req = urllib2.Request(url)
 
-        req.add_header('X-VOMS-CSRF-GUARD','')
+        req.add_header('X-VOMS-CSRF-GUARD', '')
 
         if data != None:
             req.add_header('Content-Type', 'application/json')
             req.add_data(json.dumps(data))
 
         return req
-
 
     def __httpCall(self, action, data=None):
 
@@ -500,9 +513,11 @@ class VOMSAdminProxy:
         try:
             f = self.url_opener.open(req)
         except HTTPError, e:
-            raise RuntimeError, "The server could not answer the request for %s. %s" % (req.get_full_url(),e)
+            raise RuntimeError, "The server could not answer the request for %s. %s" % (
+                req.get_full_url(), e)
         except URLError, e:
-            raise RuntimeError, "Error contacting remote server: %s. Error: %s" % (req.get_host(), e)
+            raise RuntimeError, "Error contacting remote server: %s. Error: %s" % (
+                req.get_host(), e)
 
         result = json.load(f)
 
@@ -524,8 +539,8 @@ class VOMSAdminProxy:
     def __restoreUser(self, dn, ca):
         return self.__restCall('restore-user.action', {"certificateSubject": dn, "caSubject": ca})
 
-    def __createUser(self,user,dn,ca):
-        return self.__restCall('create-user.action', {'user':user, "certificateSubject": dn, "caSubject": ca})
+    def __createUser(self, user, dn, ca):
+        return self.__restCall('create-user.action', {'user': user, "certificateSubject": dn, "caSubject": ca})
 
     def __createGroup(self, name, description):
         return self.__restCall('create-group.action', {'groupName': name, 'groupDescription': description})
@@ -547,13 +562,6 @@ class VOMSAdminProxy:
 
     def __printUserList(self, user_list):
         for u in user_list:
-
-            if not len(u['certificates']) or len(u['certificates']) == 0:
-                cert = "No certificates defined for this user."
-
-            else:
-                cert = "%s,%s" %(u['certificates'][0]['subjectString'],u['certificates'][0]['issuerString'])
-
             if u['suspended']:
                 status = "Suspended: %s" % u['suspensionReason']
             else:
@@ -565,30 +573,16 @@ class VOMSAdminProxy:
                 name = ""
 
             email = u['emailAddress']
-            print "%s,%s,%s,%s" % (cert, status, name, email)
 
-    def __printMultipleCertificatesList(self, user_list):
-        for u in user_list:
-
-
-            for c in range(len(u['certificates']) if len(u['certificates']) else 1):
-                if not len(u['certificates']) or len(u['certificates']) == 0:
-                    cert = "No certificates defined for this user."
-                else:
-                    cert = "%s,%s" %(u['certificates'][c]['subjectString'],u['certificates'][c]['issuerString'])
-
-                if u['suspended']:
-                    status = "Suspended: %s" % u['suspensionReason']
-                else:
-                    status = "Active"
-
-                if u['name'] != None and u['surname'] != None:
-                    name = "%s %s (%d)" % (u['name'], u['surname'], u['id'])
-                else:
-                    name = ""
-
-                email = u['emailAddress']
+            if not u['certificates'] or len(u['certificates']) == 0:
+                cert = "No certificates defined for this user."
                 print "%s,%s,%s,%s" % (cert, status, name, email)
+            else:
+
+                for c in u['certificates']:
+                    cert = "%s,%s" % (
+                        c['subjectString'], c['issuerString'])
+                    print "%s,%s,%s,%s" % (cert, status, name, email)
 
     def __handleCallReturnValue(self, ret_val):
         if ret_val is None:
@@ -599,7 +593,8 @@ class VOMSAdminProxy:
 
         if ret_val.has_key('exceptionClass'):
             exit_status = 1
-            print >>sys.stderr, "%s : %s" % (ret_val['exceptionClass'], ret_val['exceptionMessage'])
+            print >>sys.stderr, "%s : %s" % (
+                ret_val['exceptionClass'], ret_val['exceptionMessage'])
 
         if ret_val.has_key('errors'):
             exit_status = 1
@@ -636,10 +631,6 @@ class VOMSAdminProxy:
         res = self.__getUserStats()
         print "Expired user count: %d" % res['expiredUsersCount']
 
-    def countAllSuspendedCertificates(self):                                           
-        res = self.__getSuspendedUsers()
-        print "All Suspended certificates count: %d" % res['suspendedUsersCount']
-
     def listAUPFailingUsers(self):
         res = self._getAUPFailingUsers()
         if len(res['aupFailingUsers']) == 0:
@@ -654,13 +645,6 @@ class VOMSAdminProxy:
         else:
             self.__printUserList(res['suspendedUsers'])
 
-    def listAllSuspendedCertificates(self):                                   
-        res = self.__getSuspendedUsers()
-        if len(res['suspendedUsers']) == 0:
-            print "No suspended users found."
-        else:
-            self.__printMultipleCertificatesList({res['suspendedUsers'])
-
     def listExpiredUsers(self):
         res = self.__getExpiredUsers()
 
@@ -672,36 +656,35 @@ class VOMSAdminProxy:
     def listUserStats(self):
         res = self.__getUserStats()
         for k in res.keys():
-            print "%s = %s " % (k,res[k])
+            print "%s = %s " % (k, res[k])
 
     def getUserInfo(self, dn, ca):
-        res = self.__getUserInfo(dn,ca)
+        res = self.__getUserInfo(dn, ca)
         if res is None:
             print "No user found for the given parameters"
         else:
             print json.dumps(res)
 
-    def createUser(self,user,dn,ca,cn,email):
+    def createUser(self, user, dn, ca, cn, email):
         if user is None:
-            self.services['admin'].createUser(dn,ca,cn,email)
+            self.services['admin'].createUser(dn, ca, cn, email)
         else:
             if email is None or "" == email.strip():
                 raise RuntimeError, "Please provide an email for the user!"
             user["emailAddress"] = email
             self.__createUser(user, dn, ca)
 
-    def createGroup(self,description,groupName):
+    def createGroup(self, description, groupName):
         if description is None:
             self.services['admin'].createGroup(groupName)
         else:
             self.__createGroup(groupName, description)
 
-
     def suspendUser(self, dn, ca, reason):
         self.__suspendUser(dn, ca, reason)
 
     def restoreUser(self, dn, ca):
-        self.__restoreUser(dn,ca)
+        self.__restoreUser(dn, ca)
 
     def restoreAllSuspendedUsers(self):
         res = self.__restoreAllSuspendedUsers()

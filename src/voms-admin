@@ -35,7 +35,6 @@ import types
 
 voms_admin_default_encoding = 'utf-8'
 
-
 class EncodedStreamWriter:
     def __init__(self, writer):
         self.writer = writer
