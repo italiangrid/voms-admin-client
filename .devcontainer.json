@@ -1,0 +1,7 @@
+{
+  "name": "VOMS admin client development",
+  "dockerComposeFile": "compose/docker-compose.yml",
+  "service": "voms_admin_client",
+  "workspaceFolder": "/home/build/workspace",
+  "shutdownAction": "stopCompose"
+}
