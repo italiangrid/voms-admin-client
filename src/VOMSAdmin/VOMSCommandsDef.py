@@ -859,13 +859,5 @@ commands_def = """<?xml version="1.0" encoding="UTF-8"?>
             type="User"/>
       </command>
 
-      <command
-        name="list-all-suspended-certificates">
-        <description>list-all-suspended-certificates</description>
-        <help-string
-          xml:space="preserve">
-          Lists all the VO user certificates that are currently suspended.V</help-string>
-      </command>
-
   </command-group>
 </voms-commands>"""
