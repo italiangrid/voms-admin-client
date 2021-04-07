@@ -239,10 +239,10 @@ def execute_command(cmd):
 
     if isinstance(res, types.ListType):
         for i in res:
-            print unicode(i)
+            print unicode(str(i),'utf-8')
     else:
         if not res is None:
-            print unicode(res)
+            print unicode(str(res),'utf-8')
 
 
 def local_endpoint_conf_path():
