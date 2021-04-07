@@ -548,7 +548,11 @@ class VOMSAdminProxy:
     def __printUserList(self, user_list):
         for u in user_list:
 
-            cert = "%s,%s" %(u['certificates'][0]['subjectString'],u['certificates'][0]['issuerString'])
+            if not len(u['certificates']) or len(u['certificates']) == 0:
+                cert = "No certificates defined for this user."
+
+            else:
+                cert = "%s,%s" %(u['certificates'][0]['subjectString'],u['certificates'][0]['issuerString'])
 
             if u['suspended']:
                 status = "Suspended: %s" % u['suspensionReason']
@@ -562,6 +566,29 @@ class VOMSAdminProxy:
 
             email = u['emailAddress']
             print "%s,%s,%s,%s" % (cert, status, name, email)
+
+    def __printMultipleCertificatesList(self, user_list):
+        for u in user_list:
+
+
+            for c in range(len(u['certificates']) if len(u['certificates']) else 1):
+                if not len(u['certificates']) or len(u['certificates']) == 0:
+                    cert = "No certificates defined for this user."
+                else:
+                    cert = "%s,%s" %(u['certificates'][c]['subjectString'],u['certificates'][c]['issuerString'])
+
+                if u['suspended']:
+                    status = "Suspended: %s" % u['suspensionReason']
+                else:
+                    status = "Active"
+
+                if u['name'] != None and u['surname'] != None:
+                    name = "%s %s (%d)" % (u['name'], u['surname'], u['id'])
+                else:
+                    name = ""
+
+                email = u['emailAddress']
+                print "%s,%s,%s,%s" % (cert, status, name, email)
 
     def __handleCallReturnValue(self, ret_val):
         if ret_val is None:
@@ -609,6 +636,10 @@ class VOMSAdminProxy:
         res = self.__getUserStats()
         print "Expired user count: %d" % res['expiredUsersCount']
 
+    def countAllSuspendedCertificates(self):                                           
+        res = self.__getSuspendedUsers()
+        print "All Suspended certificates count: %d" % res['suspendedUsersCount']
+
     def listAUPFailingUsers(self):
         res = self._getAUPFailingUsers()
         if len(res['aupFailingUsers']) == 0:
@@ -622,6 +653,13 @@ class VOMSAdminProxy:
             print "No suspended users found."
         else:
             self.__printUserList(res['suspendedUsers'])
+
+    def listAllSuspendedCertificates(self):                                   
+        res = self.__getSuspendedUsers()
+        if len(res['suspendedUsers']) == 0:
+            print "No suspended users found."
+        else:
+            self.__printMultipleCertificatesList({res['suspendedUsers'])
 
     def listExpiredUsers(self):
         res = self.__getExpiredUsers()
