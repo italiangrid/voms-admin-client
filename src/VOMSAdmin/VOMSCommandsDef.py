@@ -18,7 +18,7 @@
 # 	Andrea Ceccanti (INFN)
 #
 
-commands_def="""<?xml version="1.0" encoding="UTF-8"?>
+commands_def = """<?xml version="1.0" encoding="UTF-8"?>
 <voms-commands>
   <command-group
     name="User management commands"
@@ -30,7 +30,7 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
         xml:space="preserve">
         Lists the VO users.</help-string>
     </command>
-    
+
     <command
       name="list-suspended-users">
       <description>list-suspended-users</description>
@@ -38,7 +38,7 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
         xml:space="preserve">
         Lists the VO users that are currently suspended. (Requires VOMS Admin server >= 2.7.0)</help-string>
     </command>
-    
+
     <command
       name="list-expired-users">
       <description>list-expired-users</description>
@@ -46,7 +46,7 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
         xml:space="preserve">
         Lists the VO users that are currently expired. (Requires VOMS Admin server >= 2.7.0)</help-string>
     </command>
-    
+
     <command
       name="count-expired-users">
       <description>count-expired-users</description>
@@ -54,7 +54,7 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
         xml:space="preserve">
         Prints how many VO users are currently expired. (Requires VOMS Admin server >= 2.7.0)</help-string>
     </command>
-    
+
     <command
       name="count-suspended-users">
       <description>count-suspended-users</description>
@@ -62,6 +62,7 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
         xml:space="preserve">
         Counts how many VO users are currently suspended. (Requires VOMS Admin server >= 2.7.0)</help-string>
     </command>
+
     <command
       name="count-users">
       <description>count-users</description>
@@ -69,7 +70,7 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
         xml:space="preserve">
         Counts how many users are in the VO. (Requires VOMS Admin server >= 2.7.0)</help-string>
     </command>
-    
+
     <command
       name="list-user-stats">
       <description>list-user-stats</description>
@@ -77,36 +78,43 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
         xml:space="preserve">
         List users statistics for this VO. (Requires VOMS Admin server >= 2.7.0)</help-string>
     </command>
-    
+    <command
+        name="get-user-info">
+        <description>get-user-info</description>
+        <help-string
+          xml:space="preserve">
+          List user VO membership information. (Requires VOMS Admin server >= 3.4.0)</help-string>
+        <arg type="UserV2"/>
+    </command>
     <command
       name="create-user">
       <description>[options] create-user CERTIFICATE.PEM</description>
       <help-string
         xml:space="preserve">
-        Registers a new user in VOMS. 
-        
+        Registers a new user in VOMS.
+
         Personal information can be specified with the following options:
         name, surname, address, institution, phone-number.
         (Personal info submission requires VOMS Admin server >= 2.7.0)
-        
-        All these options must be provided when registering a new user, 
+
+        All these options must be provided when registering a new user,
         or no option regarding personal information should be set.
-        
+
         Besides the personal information, information about user certificate
         can be provided specifying a certificate file parameter.
-        
-        When using the --nousercert  option, then four parameters are 
-        required (DN CA CN MAIL) to create the user. 
-        
-        Examples: 
-    
+
+        When using the --nousercert  option, then four parameters are
+        required (DN CA CN MAIL) to create the user.
+
+        Examples:
+
         voms-admin --vo test --name Andrea --surname Ceccanti --institution IGI \\
                    --phoneNumber 243 --address "My Address" \\
                    create-user .globus/usercert.pem
-        
-        voms-admin --vo test_vo create-user .globus/usercert.pem 
-        
-        voms-admin --nousercert --vo test_vo create-user \ 
+
+        voms-admin --vo test_vo create-user .globus/usercert.pem
+
+        voms-admin --nousercert --vo test_vo create-user \
         'My DN' 'My CA' 'My CN' 'My Email'</help-string>
       <arg
         type="X509v2" />
@@ -118,31 +126,31 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
       <help-string
         xml:space="preserve">
         Supends a VOMS user.
-        
-        USER is either an X509 certificate file in PEM format, 
+
+        USER is either an X509 certificate file in PEM format,
         or a DN, CA couple when the --nousercert option is set.
-        
+
         (Requires VOMS Admin server >= 2.7.0)
       </help-string>
       <arg type="User"/>
       <arg type="String"/>
     </command>
-    
+
     <command
       name="restore-user">
       <description>restore-user USER</description>
       <help-string
         xml:space="preserve">
         Restores a VOMS user.
-        
-        USER is either an X509 certificate file in PEM format, 
+
+        USER is either an X509 certificate file in PEM format,
         or a DN, CA couple when the --nousercert option is set.
-        
+
         (Requires VOMS Admin server >= 2.7.0)
       </help-string>
       <arg type="User"/>
     </command>
-    
+
     <command
       name="restore-all-suspended-users">
       <description>restore-all-suspended-users</description>
@@ -157,16 +165,16 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
       <help-string
         xml:space="preserve">
         Deletes a user from VOMS, including all their attributes
-        and membership information. 
-        
-        USER is either an X509 certificate file in PEM format, 
+        and membership information.
+
+        USER is either an X509 certificate file in PEM format,
         or a DN, CA couple when the --nousercert option is set.
-        
-        Examples: 
-        
+
+        Examples:
+
         voms-admin --vo test_vo delete-user .globus/usercert.pem
-        
-        voms-admin --nousercert --vo test_vo delete-user \ 
+
+        voms-admin --nousercert --vo test_vo delete-user \
         'My DN' 'MY CA'</help-string>
       <arg
         type="User" />
@@ -224,13 +232,13 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
       name="create-group">
       <description>[options] create-group GROUPNAME</description>
       <help-string xml:space="preserve">
-        Creates a new group named GROUPNAME. 
-        
+        Creates a new group named GROUPNAME.
+
         If the --description option is given, a description is registered
         for the group in the VOMS database (requires VOMS Admin server >= 2.7.0).
-        
-        Note that the vo root group part of the fully qualified group name 
-        can be omitted, i.e., if the group to be created is called /vo/ciccio, 
+
+        Note that the vo root group part of the fully qualified group name
+        can be omitted, i.e., if the group to be created is called /vo/ciccio,
         where /vo is the vo root group, this command accepts both the "ciccio"
         and "/vo/ciccio" syntaxes.</help-string>
       <arg
@@ -263,8 +271,8 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
       name="add-member">
       <description>add-member GROUPNAME USER</description>
       <help-string xml:space="preserve">
-        Adds USER to the GROUPNAME group. 
-        
+        Adds USER to the GROUPNAME group.
+
         USER is either an X509 certificate file in PEM format,
         or a DN, CA couple when the --nousercert option is set.</help-string>
       <arg
@@ -276,9 +284,9 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
       name="remove-member">
       <description>remove-member GROUPNAME USER</description>
       <help-string xml:space="preserve">
-        Removes USER from the GROUPNAME group. 
-        
-        USER is either an X509 certificate file in PEM format, 
+        Removes USER from the GROUPNAME group.
+
+        USER is either an X509 certificate file in PEM format,
         or a DN, CA couple when the --nousercert option is set.</help-string>
       <arg
         type="Group" />
@@ -302,9 +310,9 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
       name="assign-role">
       <description>assign-role GROUPNAME ROLENAME USER</description>
       <help-string xml:space="preserve">
-        Assigns role ROLENAME to user USER in group GROUPNAME. 
-        
-        USER is either an X509 certificate file in PEM format, 
+        Assigns role ROLENAME to user USER in group GROUPNAME.
+
+        USER is either an X509 certificate file in PEM format,
         or a DN, CA couple when the --nousercert option is set.</help-string>
       <arg
         type="Group" />
@@ -319,8 +327,8 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
       </description>
       <help-string xml:space="preserve">
         Dismiss role ROLENAME from user USER in group GROUPNAME.
-        
-        USER is either an X509 certificate file in PEM format, 
+
+        USER is either an X509 certificate file in PEM format,
         or a DN, CA couple when the --nousercert option is set.</help-string>
       <arg
         type="Group" />
@@ -344,9 +352,9 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
       name="list-user-roles">
       <description>list-user-roles USER</description>
       <help-string xml:space="preserve">
-        Lists the roles that USER is assigned. 
-        
-        USER is either an X509 certificate file in PEM format, 
+        Lists the roles that USER is assigned.
+
+        USER is either an X509 certificate file in PEM format,
         or a DN, CA couple when the --nousercert option is set.</help-string>
       <arg
         type="User" />
@@ -361,9 +369,9 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
       </description>
       <help-string xml:space="preserve">
         Creates a new generic attribute class named CLASSNAME, with
-        description DESCRIPTION. 
-        
-        UNIQUE is a boolean argument. If UNIQUE is true, 
+        description DESCRIPTION.
+
+        UNIQUE is a boolean argument. If UNIQUE is true,
         attribute values assigned to users for this class are checked for
         uniqueness. Otherwise no checks are performed on user attribute values.
       </help-string>
@@ -470,7 +478,7 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
       name="delete-group-attribute">
       <description>delete-group-attribute GROUP ATTRIBUTE
       </description>
-      <help-string xml:space="preserve"> 
+      <help-string xml:space="preserve">
         Deletes the generic attribute ATTRIBUTE value from group
         GROUP.</help-string>
       <arg
@@ -541,64 +549,64 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
       <help-string xml:space="preserve">
         Adds an entry to the ACL for CONTEXT assigning PERMISSION
         to user/admin USER. If PROPAGATE is true, the entry is
-        propagated to children contexts. 
-                                
-        CONTEXT may be either a group (e.g. /groupname ) or 
+        propagated to children contexts.
+
+        CONTEXT may be either a group (e.g. /groupname ) or
         a qualified role (e.g./groupname/Role=VO-Admin).
-                                
-        USER is either an X509 certificate file in PEM format, 
+
+        USER is either an X509 certificate file in PEM format,
         or a DN, CA couple when the --nousercert option is set.
-                                
+
         PERMISSION is a VOMS permission expressed using the
         VOMS-Admin 2.x format. Allowed permission values are:
-                                
-        ALL 
-        CONTAINER_READ CONTAINER_WRITE 
-        MEMBERSHIP_READ MEMBERSHIP_WRITE 
+
+        ALL
+        CONTAINER_READ CONTAINER_WRITE
+        MEMBERSHIP_READ MEMBERSHIP_WRITE
         ATTRIBUTES_READ ATTRIBUTES_WRITE
-        ACL_READ ACL_WRITE ACL_DEFAULT 
+        ACL_READ ACL_WRITE ACL_DEFAULT
         REQUESTS_READ REQUESTS_WRITE
         PERSONAL_INFO_READ PERSONAL_INFO_WRITE
         SUSPEND
-                                
+
         Multiple permissions can be assigned by combining them
         in a comma separated list, e.g.:
         "CONTAINER_READ,MEMBERSHIP_READ"
-                                                                
+
         Special meaning DN,CA couples (to be used with
         the --nousercert option set) are listed hereafter:
 
         If DN is ANYONE and CA is VOMS_CA, an entry will be created
-        that assigns the specified PERMISSION to to any 
+        that assigns the specified PERMISSION to to any
         authenticated user (i.e., any client that authenticates
         with a certificates signed by a trusted CA).
-        
+
         if CA is GROUP_CA, DN is interpreted as a group and entry
         will be assigned to members of such group.
-        
-        if CA is ROLE_CA, DN is interpreted as a qualified role 
+
+        if CA is ROLE_CA, DN is interpreted as a qualified role
         (i.e., /test_vo/Role=TestRole), the entry will be assigned
         to VO members that have the given role in the given group.
-                                
-                                
+
+
         Examples:
-                                
+
         voms-admin --vo test_vo add-ACL-entry /test_vo \\
         .globus/usercert.pem ALL true
-                                
-        (The above command grants full rights to the user identified by 
+
+        (The above command grants full rights to the user identified by
         '.globus/usercert.pem' on the whole VO, since PROPAGATE is true)
-                                
+
         voms-admin --nousercert --vo test_vo add-ACL-entry /test_vo \\
         'ANYONE' 'VOMS_CA' 'CONTAINER_READ,MEMBERSHIP_READ' true
-                                
-        (The above command grants READ rights on VO structure and membership 
+
+        (The above command grants READ rights on VO structure and membership
         to any authenticated user on the whole VO, since PROPAGATE is true)
-                                
+
         To get more detailed information about Voms admin AuthZ
-        framework, either consult the voms-admin user's guide 
+        framework, either consult the voms-admin user's guide
         or type:
-                                    
+
         voms-admin --help-acl</help-string>
       <arg
         type="String" />
@@ -612,47 +620,47 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
     <command
       name="add-default-ACL-entry">
       <description> add-default-ACL-entry GROUP USER PERMISSION</description>
-      <help-string xml:space="preserve"> 
+      <help-string xml:space="preserve">
         Adds an entry to the default ACL for GROUP assigning
-        PERMISSION to user/admin USER. 
-        
+        PERMISSION to user/admin USER.
+
         USER is either an X509 certificate file
         in PEM format, or a DN, CA couple when the --nousercert option is set.
-        
+
         PERMISSION is a VOMS permission expressed using the VOMS-Admin 2.x
-        format. 
-        
-        Allowed permission values are: 
-        ALL 
-        CONTAINER_READ CONTAINER_WRITE 
+        format.
+
+        Allowed permission values are:
+        ALL
+        CONTAINER_READ CONTAINER_WRITE
         MEMBERSHIP_READ MEMBERSHIP_WRITE
-        ATTRIBUTES_READ ATTRIBUTES_WRITE 
-        ACL_READ ACL_WRITE ACL_DEFAULT 
+        ATTRIBUTES_READ ATTRIBUTES_WRITE
+        ACL_READ ACL_WRITE ACL_DEFAULT
         REQUESTS_READ REQUESTS_WRITE
         PERSONAL_INFO_READ PERSONAL_INFO_WRITE
-        SUSPEND 
-        
+        SUSPEND
+
         Multiple permissions can be assigned by combining them
-        in a comma separated list, e.g.: 
+        in a comma separated list, e.g.:
         "CONTAINER_READ,MEMBERSHIP_READ"
-        
-        Special meaning DN,CA couples are listed hereafter: 
-        
-        If DN is ANYONE and CA is VOMS_CA, an entry will be created that 
-        assigns the specified PERMISSION to to any authenticated user (i.e., 
-        any client that authenticates with a certificates signed by 
-        a trusted CA). 
-        
-        if CA is GROUP_CA, DN is interpreted as a group and entry will be 
-        assigned to members of such group. 
-        
-        if CA is ROLE_CA, DN is interpreted as a qualified role 
-        (i.e., /test_vo/Role=TestRole), the entry will be assigned to VO 
-        members that have the given role in the given group. 
-        
-        To get more detailed information about Voms admin AuthZ framework, 
-        either consult the voms-admin user's guide or type: 
-        
+
+        Special meaning DN,CA couples are listed hereafter:
+
+        If DN is ANYONE and CA is VOMS_CA, an entry will be created that
+        assigns the specified PERMISSION to to any authenticated user (i.e.,
+        any client that authenticates with a certificates signed by
+        a trusted CA).
+
+        if CA is GROUP_CA, DN is interpreted as a group and entry will be
+        assigned to members of such group.
+
+        if CA is ROLE_CA, DN is interpreted as a qualified role
+        (i.e., /test_vo/Role=TestRole), the entry will be assigned to VO
+        members that have the given role in the given group.
+
+        To get more detailed information about Voms admin AuthZ framework,
+        either consult the voms-admin user's guide or type:
+
         voms-admin --help-acl</help-string>
       <arg
         type="Group" />
@@ -666,42 +674,42 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
       <description>remove-ACL-entry CONTEXT USER PROPAGATE
       </description>
       <help-string xml:space="preserve">
-        Removes the entry from the ACL for CONTEXT for user/admin USER. 
-        
+        Removes the entry from the ACL for CONTEXT for user/admin USER.
+
         If PROPAGATE is true, the entry is removed also from children
-        contexts. 
-        
+        contexts.
+
         CONTEXT may be either a group (e.g. /groupname ) or a
-        qualified role (e.g./groupname/Role=VO-Admin). 
-        
+        qualified role (e.g./groupname/Role=VO-Admin).
+
         USER is either an X509 certificate file
         in PEM format, or a DN, CA couple when the --nousercert option is set.
-        
-        Special meaning DN,CA couples are listed hereafter: 
-        
-        If DN is ANYONE and CA is VOMS_CA, an entry will be created that 
-        assigns the specified PERMISSION to to any authenticated user (i.e., 
-        any client that authenticates with a certificates signed by 
-        a trusted CA). 
-        
-        if CA is GROUP_CA, DN is interpreted as a group and entry will be 
-        assigned to members of such group. 
-        
-        if CA is ROLE_CA, DN is interpreted as a qualified role 
-        (i.e., /test_vo/Role=TestRole), the entry will be assigned to VO 
-        members that have the given role in the given group. 
-        
-        Examples: 
-        
-        voms-admin --nousercert --vo test_vo remove-ACL-entry \\ 
-        /test_vo 'ANYONE' 'VOMS_CA' true 
-        
-        (The above command removes any right on the VO from any authenticated 
-        user) 
-        
-        To get more detailed information about Voms admin AuthZ framework, 
-        either consult the voms-admin user's guide or type: 
-        
+
+        Special meaning DN,CA couples are listed hereafter:
+
+        If DN is ANYONE and CA is VOMS_CA, an entry will be created that
+        assigns the specified PERMISSION to to any authenticated user (i.e.,
+        any client that authenticates with a certificates signed by
+        a trusted CA).
+
+        if CA is GROUP_CA, DN is interpreted as a group and entry will be
+        assigned to members of such group.
+
+        if CA is ROLE_CA, DN is interpreted as a qualified role
+        (i.e., /test_vo/Role=TestRole), the entry will be assigned to VO
+        members that have the given role in the given group.
+
+        Examples:
+
+        voms-admin --nousercert --vo test_vo remove-ACL-entry \\
+        /test_vo 'ANYONE' 'VOMS_CA' true
+
+        (The above command removes any right on the VO from any authenticated
+        user)
+
+        To get more detailed information about Voms admin AuthZ framework,
+        either consult the voms-admin user's guide or type:
+
         voms-admin --help-acl</help-string>
       <arg
         type="String" />
@@ -714,30 +722,30 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
       name="remove-default-ACL-entry">
       <description>remove-default-ACL-entry GROUP USER
       </description>
-      <help-string xml:space="preserve"> 
+      <help-string xml:space="preserve">
         Removes the entry for user/admin USER from the default ACL
-        for GROUP. 
-        
-        USER is either an X509 certificate file in PEM format, or a DN, 
+        for GROUP.
+
+        USER is either an X509 certificate file in PEM format, or a DN,
         CA couple when the --nousercert option is set.
-        
-        Special meaning DN,CA couples are listed hereafter: 
-        
-        If DN is ANYONE and CA is VOMS_CA, an entry will be created that 
-        assigns the specified PERMISSION to to any authenticated user (i.e., 
-        any client that authenticates with a certificates signed by 
-        a trusted CA). 
-        
-        if CA is GROUP_CA, DN is interpreted as a group and entry will be 
-        assigned to members of such group. 
-        
-        if CA is ROLE_CA, DN is interpreted as a qualified role 
-        (i.e., /test_vo/Role=TestRole), the entry will be assigned to VO 
+
+        Special meaning DN,CA couples are listed hereafter:
+
+        If DN is ANYONE and CA is VOMS_CA, an entry will be created that
+        assigns the specified PERMISSION to to any authenticated user (i.e.,
+        any client that authenticates with a certificates signed by
+        a trusted CA).
+
+        if CA is GROUP_CA, DN is interpreted as a group and entry will be
+        assigned to members of such group.
+
+        if CA is ROLE_CA, DN is interpreted as a qualified role
+        (i.e., /test_vo/Role=TestRole), the entry will be assigned to VO
         members that have the given role in the given group.
-        
-        To get more detailed information about Voms admin AuthZ framework, 
-        either consult the voms-admin user's guide or type: 
-        
+
+        To get more detailed information about Voms admin AuthZ framework,
+        either consult the voms-admin user's guide or type:
+
         voms-admin --help-acl</help-string>
       <arg
         type="Group" />
@@ -765,17 +773,17 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
       name="Certificate management commands"
       shortname="Certificate"
       >
-      <command 
+      <command
           name="add-certificate">
               <description>add-certificate USER CERT</description>
               <help-string xml:space="preserve">
-                  Binds a certificate to an existing VO user. 
+                  Binds a certificate to an existing VO user.
                   This operation may take either two pem certficate files as argument, or,
                   if the --nousercert option is set, two DN CA couples.
-                  
+
                   Example:
                   voms-admin --vo infngrid add-certificate my-cert.pem my-other-cert.pem
-                  
+
                   voms-admin --vo infngrid --nousercert add-certificate \\
                     '/C=IT/O=INFN/OU=Personal Certificate/L=CNAF/CN=Andrea Ceccanti' '/C=IT/O=INFN/CN=INFN CA' \\
                     '/C=IT/ST=Test/CN=user0/Email=andrea.ceccanti@cnaf.infn.it' '/C=IT/ST=Test/L=Bologna/O=Voms-Admin/OU=Voms-Admin testing/CN=Test CA'
@@ -783,34 +791,34 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
             <arg type="User"/>
             <arg type="User"/>
       </command>
-      <command 
+      <command
           name="remove-certificate">
               <description>remove-certificate USER</description>
               <help-string xml:space="preserve">
                   Unbinds a certificate from an existing VO user.
                   This operation takes either a pem certificate as argument, or,
                   if the --nousercert option is set, a DN CA couple.
-                  
+
                   Example:
-                  
+
                   voms-admin --vo infngrid remove-certificate my-cert.pem
-                  
+
                   voms-admin --vo infngrid --nousercert remove-certificate \\
                     '/C=IT/O=INFN/OU=Personal Certificate/L=CNAF/CN=Andrea Ceccanti' '/C=IT/O=INFN/CN=INFN CA'
             </help-string>
             <arg type="User"/>
       </command>
-      <command 
+      <command
           name="suspend-certificate">
               <description>suspend-certificate USER REASON</description>
               <help-string xml:space="preserve">
                   Suspends a user certificate, and specifies a reason for the suspension.
                   This operation takes, for the first argument, either a pem certificate as argument, or,
                   if the --nousercert option is set, a DN CA couple.
-                  
+
                   Example:
                   voms-admin --vo infngrid suspend-certificate usercert.pem 'Security incident!'
-                  
+
                   voms-admin --vo infngrid --nousercert suspend-certificate \\
                       '/C=IT/O=INFN/OU=Personal Certificate/L=CNAF/CN=Andrea Ceccanti' '/C=IT/O=INFN/CN=INFN CA' \\
                       'Security incident!'
@@ -818,17 +826,17 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
             <arg type="User"/>
             <arg type="String"/>
       </command>
-      <command 
+      <command
           name="restore-certificate">
               <description>restore-certificate USER</description>
               <help-string xml:space="preserve">
                   Restores a user certificate.
                   This operation takes, for the first argument, either a pem certificate as argument, or,
                   if the --nousercert option is set, a DN CA couple.
-                  
+
                   Example:
                   voms-admin --vo infngrid restore-certificate usercert.pem
-                  
+
                   voms-admin --vo infngrid --nousercert restore-certificate \\
                       '/C=IT/O=INFN/OU=Personal Certificate/L=CNAF/CN=Andrea Ceccanti' '/C=IT/O=INFN/CN=INFN CA'
             </help-string>
@@ -840,15 +848,16 @@ commands_def="""<?xml version="1.0" encoding="UTF-8"?>
           <help-string xml:space="preserve">
             Lists the certificates associated to a user.
             This operation takes either a pem certificate as argument, or, if the --nousercert option is set, a DN CA couple.
-            
+
             Example:
             voms-admin --vo infngrid get-certificates usercert.pem
-            
+
             voms-admin --vo infngrid --nousercert get-certificates \\
                 '/C=IT/O=INFN/OU=Personal Certificate/L=CNAF/CN=Andrea Ceccanti' '/C=IT/O=INFN/CN=INFN CA'
         </help-string>
         <arg
             type="User"/>
       </command>
+
   </command-group>
 </voms-commands>"""

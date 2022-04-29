@@ -1,0 +1,38 @@
+version: '3.5'
+
+volumes:
+  vscode-server:
+  dotlocal:
+
+services:
+
+  init:
+    image: italiangrid/voms-admin-client-centos7:latest
+    volumes:
+      - vscode-server:/home/test/.vscode-server
+      - dotlocal:/home/test/.local
+    command: sudo chown -R build:build /home/test/.vscode-server /home/test/.local
+
+  voms_admin_client:
+    image: italiangrid/voms-admin-client-centos7:latest
+
+    depends_on:
+      - init
+
+    environment:
+      - TZ=Europe/Rome
+
+    volumes:
+      - vscode-server:/home/test/.vscode-server
+      - dotlocal:/home/test/.local
+      - $HOME/grid-security:/etc/grid-security/certificates
+      - $HOME/ca-bundle:/etc/pki
+      - $HOME/vomsdir:/etc/grid-security/vomsdir:ro
+      - $HOME/vomses:/etc/vomses
+      - $HOME/.globus:/home/test/.globus:ro
+      - ..:/home/test/workspace:cached
+
+    entrypoint: /tini -- sleep infinity
+
+    extra_hosts:
+      - "dev.local.io: 192.168.65.2"

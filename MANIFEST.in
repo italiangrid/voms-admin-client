@@ -1,2 +1,2 @@
-include CHANGELOG LICENSE README Makefile setup.py
+include CHANGELOG LICENSE README.md Makefile setup.py
 recursive-include doc *.1
